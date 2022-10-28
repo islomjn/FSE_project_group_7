@@ -13,6 +13,10 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: install
+      run: sudo apt install libomp-dev
+    - name: execute
+      run: g++ main_matrix.cpp -fopenmp -o main
     - name: configure
       run: ./configure
     - name: make
