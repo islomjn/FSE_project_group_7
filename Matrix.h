@@ -33,7 +33,7 @@ template<class T, int R = 0, int C = 0> class Matrix{
                         }
                     }
                     if(y == -1){
-                        throw "Error: No result fount by " + string(key) + " key in the array.";
+                        throw "Error: No result found by " + string(key) + " key in the array.";
                     }
                     return _arr[y + width * x];
                 }
