@@ -5,7 +5,7 @@ int k = 3;
 int n = 3;
 
 Matrix<float> matmul(Matrix<float> a, Matrix<float> b){
-    Matrix<float> ret_val;
+    Matrix<float> ret_val(3, 3);
     for(int i=0; i < n; i++){
         for(int j=0; j < m; j++){
             ret_val[i][j] = 0;

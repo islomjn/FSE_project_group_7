@@ -2,10 +2,23 @@
 This is a repo for Foundations of Software Engineering project.
 
 Simple matrix multiplication parallelized algo using OpenMP library and Matrix dataclass https://github.com/pwwiur/Matrix
-To run
+To run:
 ```
 sudo apt install g++
 sudo apt install libomp-dev
 g++ main.cpp matrix_functions.cpp -fopenmp -o main
 ./main
 ```
+
+### Testing
+To install testing framework:
+```
+./test_libs_install.sh
+```
+
+To test:
+```
+./test_run.sh
+```
+
+IMPORTANT NOTE: supposed start from project directory within Docker container, otherwise add sudo command to scripts.
