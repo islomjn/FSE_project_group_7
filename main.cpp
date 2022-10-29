@@ -4,9 +4,13 @@
 #include "Matrix.h"
 #include "matrix_functions.h"
 
-Matrix<float> a(3, 3);
+int n = 4;
+int m = 5;
+int k = 3;
 
-Matrix<float> b(3, 3);
+Matrix<float> a(n, k);
+
+Matrix<float> b(k, m);
 
 void fill_matrices(){
     a[0][0] = 2;
@@ -18,6 +22,9 @@ void fill_matrices(){
     a[2][0] = 2;
     a[2][1] = 0;
     a[2][2] = 0;
+    a[3][0] = 2;
+    a[3][1] = 0;
+    a[3][2] = 0;
 
     b[0][0] = 5;
     b[0][1] = 0;
@@ -28,9 +35,14 @@ void fill_matrices(){
     b[2][0] = 2;
     b[2][1] = 0;
     b[2][2] = 0;
+    b[2][0] = 2;
+    b[2][1] = 0;
+    b[2][2] = 0;
+    b[2][0] = 2;
+    b[2][1] = 0;
+    b[2][2] = 0;
 }
 
-std::vector <int> global_vector = {1, 2, 3, 4};
 
 int main(){
     fill_matrices();
@@ -39,22 +51,12 @@ int main(){
     print_matrix(a);
     std::cout << "\nB =\n";
     print_matrix(b);
+
+    std::cout << "Maximum available number of threads: " << omp_get_max_threads();
     
-    Matrix<float> c(a.height, b.width);
-    omp_set_num_threads(a.width);
-    #pragma omp parallel shared(c)
-    {  
-        Matrix<float> d(1, a.width); 
-        int thread_number = omp_get_thread_num();
-        for(int i = 0; i < a.width; i++){
-            d[0][i] = a[thread_number][i];
-        }
-        d = vector_mat_mul(d, b);
-     for(int i = 0; i < c.width; i++){
-         c[thread_number][i] = d[0][i];
-     }
-    }
-    std::cout << "\nA X B = \n";
-    print_matrix(c);
+    std::cout << "\nResult of parallelized matmul:\n";
+    print_matrix(parallel_matmul(a, b));
+    std::cout << "Reference result:\n";
+    print_matrix(ref_matmul(a, b));
     return 0;
 }
