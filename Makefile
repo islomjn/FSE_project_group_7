@@ -1,12 +1,8 @@
-all: program
-#program: mpi.c
-#        mpicc mpi.c -o program
+COMPILER=g++
+FLAGS=-fopenmp
 
-program: main_matrix.cpp
-        mpicc main_matrix.cpp -o program
-#test:
+program: main.cpp
+	$(COMPILER) main.cpp matrix_functions.cpp $(FLAGS) -o main
 
-
-clean: 
-        rm program
-
+clean:
+	rm main
