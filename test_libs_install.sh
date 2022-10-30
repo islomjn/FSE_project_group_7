@@ -1,3 +1,4 @@
+#!/bin/sh
 apt install libgtest-dev libgmock-dev
 apt install libtbb-dev
 apt install cmake
