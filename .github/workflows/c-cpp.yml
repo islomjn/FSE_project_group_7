@@ -45,3 +45,9 @@ jobs:
       -
         name: install deps
         run: sudo apt install g++
+      -
+        name: run cpp file
+        run: g++ main.cpp matrix_functions.cpp -fopenmp -o main
+      - 
+        name: execute
+        run: ./main
