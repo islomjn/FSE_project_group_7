@@ -55,11 +55,14 @@ jobs:
         name: execute
         run: ./run.sh
       -
-        name: change mode of test file
+        name: change mode of test libs install file
         run: chmod +x test_libs_install.sh
       -
         name: install test libs
         run: ./test_libs_install.sh
-      - 
+      -
+        name: change mode of test file
+        run: chmod +x test_run.sh
+      -
         name: test
         run: ./test_run.sh
