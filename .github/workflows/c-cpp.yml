@@ -49,8 +49,14 @@ jobs:
 #         name: run cpp file
 #         run: g++ main.cpp matrix_functions.cpp -fopenmp -o main
       - 
-        name: change_mode
+        name: change mode
         run: chmod +x run.sh
       -
         name: execute
         run: ./run.sh
+      -
+        name: install test libs
+        run: ./test_libs_install.sh
+      - 
+        name: test
+        run: ./test_run.sh
