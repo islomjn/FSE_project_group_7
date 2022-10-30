@@ -48,4 +48,4 @@ jobs:
     needs: image_building
     steps:
       - name: run the docker image
-        run: docker --rm -t project:v1
+        run: docker -t project:v1
