@@ -4,7 +4,24 @@
 #include "Matrix.h"
 #include "matrix_functions.h"
 
-TEST(Calculations, id_matrices) {
+TEST(Calculations, id_matrices_1_1) {
+	int N = 1;
+	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
+	id1[0][0] = 1.0;
+	id2[0][0] = 1.0;
+	expRes[0][0] = 1.0;
+	
+	calcRes = matmul(id1, id2);
+
+	EXPECT_TRUE(calcRes == expRes);
+
+	std::cout << "Expected:\n";
+	print_matrix(expRes);
+	std::cout << "Received:\n";
+	print_matrix(calcRes);
+}
+
+TEST(Calculations, id_matrices_3_3) {
 	int N = 3;
 	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
 	for (int i = 0; i < N; ++i) 
