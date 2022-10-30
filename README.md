@@ -18,10 +18,8 @@ docker run -it project:v1
 ### Launch
 To run:
 ```
-sudo apt install g++
-sudo apt install libomp-dev
-g++ main.cpp matrix_functions.cpp -fopenmp -o main
-./main
+chmod +x run.sh
+./run.sh
 ```
 
 ### Testing
