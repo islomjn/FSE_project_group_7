@@ -1,58 +1,160 @@
-#include <gtest/gtest.h>
+#include <cstdlib>
 #include <iostream>
+#include <ctime>
+#include <cmath>
+#include <climits>
+#include <gtest/gtest.h>
+#include <omp.h>
 
 #include "Matrix.h"
 #include "matrix_functions.h"
 
-TEST(Calculations, id_matrices_test_refererence_matmul) {
-	int N = 3;
-	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
-	for (int i = 0; i < N; ++i) 
-		for (int j = 0; j < N; ++j)
-			if (i == j) {
-				id1[i][j] = 1.0;
-				id2[i][j] = 1.0;
-				expRes[i][j] = 1.0;
-			} else {
-				id1[i][j] = 0.0;
-				id2[i][j] = 0.0;
-				expRes[i][j] = 0.0;
-			}
-	
-	calcRes = ref_matmul(id1, id2);
+// Helpers ----------------------------------------------------------------
 
-	EXPECT_TRUE(calcRes == expRes);
-
-	std::cout << "Expected:\n";
-	print_matrix(expRes);
-	std::cout << "Received:\n";
-	print_matrix(calcRes);
+int numOfThreadsForMatMul(int height) {
+	if (height > omp_get_max_threads()){
+        return omp_get_max_threads();
+    } else {
+        return height;
+    }
 }
 
-TEST(Calculations, id_matrices_parallel_vs_reference) {
-	int N = 3;
-	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
+bool is_equal(Matrix<float> a, Matrix<float> b, float eps=FLT_EPSILON) {
+	if(a.width == b.width && a.height == b.height){
+      	for(int i = 0; i < a.height; i++)
+          	for(int j = 0; j < a.width; j++)
+              	if (abs(a[i][j] - b[i][j]) > FLT_EPSILON) {
+              		cout << "ERROR in element " << i << ", " << j << ":\n";
+              		cout << "a = " << a[i][j] << ", b = " << b[i][j] << "\n";
+              		return false;
+              	}
+      	return true;
+  	}
+  	return false;
+}
+
+Matrix<float> id_matrix(uint N) {
+	Matrix<float> m(N, N);
 	for (int i = 0; i < N; ++i) 
 		for (int j = 0; j < N; ++j)
-			if (i == j) {
-				id1[i][j] = 1.0;
-				id2[i][j] = 1.0;
-				expRes[i][j] = 1.0;
-			} else {
-				id1[i][j] = 0.0;
-				id2[i][j] = 0.0;
-				expRes[i][j] = 0.0;
-			}
-	
-	expRes = ref_matmul(id1, id2);
-	calcRes = parallel_matmul(id1, id2);
+			if (i == j) 
+				m[i][j] = 1.0;
+			else 
+				m[i][j] = 0.0;
+	return m;
+}
 
-	EXPECT_TRUE(calcRes == expRes);
+float normRand(float magnitude=100) {
+	return (float)((rand() - (double)RAND_MAX/2.0)*magnitude*2/RAND_MAX);
+}
 
+int posIntRand(int magnitude=100) {
+	return rand() % magnitude + 1;
+}
+
+Matrix<float> rand_matrix(uint N) {
+	srand(time(0));
+	Matrix<float> m(N, N);
+	for (int i = 0; i < N; ++i) 
+		for (int j = 0; j < N; ++j)
+			m[i][j] = normRand();
+	return m;
+}
+
+Matrix<float> rand_matrix(uint heigth, uint width, float magnitude=100) {
+	srand(time(0));
+	Matrix<float> m(heigth, width);
+	for (int i = 0; i < heigth; ++i) 
+		for (int j = 0; j < width; ++j)
+			m[i][j] = normRand(magnitude);
+	return m;
+}
+
+void print_exp_rec(Matrix<float> expMatr, Matrix<float> recMatr) {
 	std::cout << "Expected:\n";
-	print_matrix(expRes);
+	print_matrix(expMatr);
 	std::cout << "Received:\n";
-	print_matrix(calcRes);
+	print_matrix(recMatr);
+}
+
+void print_matrix(Matrix<float> a, int strnum){
+	if (strnum < a.height) {
+		cout << "First " << strnum << " strings:\n";
+	}
+   	for(int i=0; i < a.height and i < strnum; i++){
+       for(int j=0; j < a.width; j++){
+           std::cout << a[i][j] << " ";
+       }
+       std::cout << std::endl;
+   }
+}
+
+void print_matrix(Matrix<float> a, int strnum, int colnum){
+	if (strnum < a.height) {
+		cout << "First " << strnum << " strings:\n";
+	}
+	if (colnum < a.width) {
+		cout << "First " << colnum << " columns:\n";
+	}
+   	for(int i=0; i < a.height and i < strnum; i++){
+       for(int j=0; j < a.width and j < colnum; j++){
+           std::cout << a[i][j] << " ";
+       }
+       std::cout << std::endl;
+   }
+}
+
+void print_transp_matrix(Matrix<float> a){
+	std::cout << "Transposed:\n";
+   	for(int j=0; j < a.width; j++){
+       for(int i=0; i < a.height; i++){
+           std::cout << a[i][j] << " ";
+       }
+       std::cout << std::endl;
+   }
+}
+
+void print_transp_matrix(Matrix<float> a, int colnum){
+	std::cout << "Transposed:\n";
+	if (colnum < a.width) {
+		cout << "First " << colnum << " columns:\n";
+	}
+   	for(int j=0; j < a.width and j < colnum; j++){
+       for(int i=0; i < a.height; i++){
+           std::cout << a[i][j] << " ";
+       }
+       std::cout << std::endl;
+   }
+}
+
+void print_transp_matrix(Matrix<float> a, int strnum, int colnum){
+	std::cout << "Transposed:\n";
+	if (strnum < a.height) {
+		cout << "First " << strnum << " strings:\n";
+	}
+	if (colnum < a.width) {
+		cout << "First " << colnum << " columns:\n";
+	}
+   	for(int j=0; j < a.width and j < colnum; j++){
+       for(int i=0; i < a.height and i < strnum; i++){
+           std::cout << a[i][j] << " ";
+       }
+       std::cout << std::endl;
+   }
+}
+
+void print_exp_rec(Matrix<float> expMatr, Matrix<float> recMatr, int strnum) {
+	std::cout << "Expected:\n";
+	print_matrix(expMatr, strnum);
+	std::cout << "Received:\n";
+	print_matrix(recMatr, strnum);
+}
+
+void print_exp_rec(Matrix<float> expMatr, Matrix<float> recMatr, int strnum, int colnum) {
+	std::cout << "Expected:\n";
+	print_matrix(expMatr, strnum, colnum);
+	std::cout << "Received:\n";
+	print_matrix(recMatr, strnum, colnum);
 }
 
 void fill_n_4_k_3_m_5_matrices(Matrix<float> a, Matrix<float> b){
@@ -109,7 +211,117 @@ void fill_n_4_k_3_m_5_reference(Matrix<float> c){
     c[3][4] = 0;
 }
 
-TEST(Calculations, NxK_KXM_matrices_reference) {
+// Tests  ----------------------------------------------------------------
+
+/// Predefined tests ------------------------------------------------------
+
+//// Matrix class test -----------------------------------------------------
+
+TEST(Predefined_matrix_class_test_invalid, id_min1) {
+	try {
+		int N = -1;
+		Matrix<float> id1(N, N);
+		FAIL();
+	}
+	catch(const char* errstr) {
+		cout << errstr << endl;
+		SUCCEED();
+	}
+}
+
+TEST(Predefined_matrix_class_test_invalid, id_0) {
+	try {
+		int N = 0;
+		Matrix<float> id1(N, N);
+		FAIL();
+	}
+	catch(const char* errstr) {
+		cout << errstr << endl;
+		SUCCEED();
+	}
+}
+
+TEST(Predefined_matrix_class_test_valid, id_1) {
+	try {
+		int N = 1;
+		Matrix<float> id1(N, N);
+		SUCCEED();
+	}
+	catch(const char* errstr) {
+		cout << errstr << endl;
+		FAIL();
+	}
+}
+
+TEST(Predefined_matrix_class_test_valid, id_100) {
+	try {
+		int N = 100;
+		Matrix<float> id1(N, N);
+		SUCCEED();
+	}
+	catch(const char* errstr) {
+		cout << errstr << endl;
+		FAIL();
+	}
+}
+
+//// Reference test --------------------------------------------------------
+
+TEST(Predefined_reference_test_valid, id_1) {
+	int N = 1;
+	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
+	id1 = id_matrix(N);
+	id2 = id_matrix(N);
+	expRes = id_matrix(N);
+	
+	calcRes = ref_matmul(id1, id2);
+
+	EXPECT_TRUE(is_equal(expRes, calcRes));
+	print_exp_rec(expRes, calcRes);
+}
+
+TEST(Predefined_reference_test_valid, id_100) {
+	int N = 100;
+	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
+	id1 = id_matrix(N);
+	id2 = id_matrix(N);
+	expRes = id_matrix(N);
+	
+	calcRes = ref_matmul(id1, id2);
+
+	EXPECT_TRUE(is_equal(expRes, calcRes));
+	print_exp_rec(expRes, calcRes, 5, 5);
+}
+
+//// Parallel test -----------------------------------------------
+
+TEST(Predefined_parallel_test_valid, id_1) {
+	int N = 1;
+	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
+	id1 = id_matrix(N);
+	id2 = id_matrix(N);
+	expRes = id_matrix(N);
+	
+	calcRes = parallel_matmul(id1, id2);
+
+	EXPECT_TRUE(is_equal(expRes, calcRes));
+	print_exp_rec(expRes, calcRes);
+}
+
+TEST(Predefined_parallel_test_valid, id_100) {
+	int N = 100;
+	Matrix<float> id1(N, N), id2(N, N), calcRes(N, N), expRes(N, N);
+	id1 = id_matrix(N);
+	id2 = id_matrix(N);
+	expRes = id_matrix(N);
+	
+	calcRes = parallel_matmul(id1, id2);
+
+	EXPECT_TRUE(is_equal(expRes, calcRes));
+	print_exp_rec(expRes, calcRes, 5, 5);
+}
+
+TEST(Predefined_parallel_test_valid, NxK_KxM) {
 	int N = 4;
 	int K = 3;
 	int M = 5;
@@ -119,35 +331,89 @@ TEST(Calculations, NxK_KXM_matrices_reference) {
 
 	calcRes = parallel_matmul(a, b);
 
-	EXPECT_TRUE(calcRes == expRes);
-
-	std::cout << "Expected:\n";
-	print_matrix(expRes);
-	std::cout << "Received:\n";
-	print_matrix(calcRes);
+	EXPECT_TRUE(is_equal(expRes, calcRes));
+	print_exp_rec(expRes, calcRes);
 }
 
-TEST(Calculations, NxK_KXM_matrices_ref_vs_parallel) {
+//// Parallel vs reference test -------------------------------------------------------
+
+TEST(Parallel_vs_reference_valid, id_3) {
+	int N = 3;
+	Matrix<float> id1(N, N), id2(N, N), refRes(N, N), parRes(N, N);
+	id1 = id_matrix(N);
+	id2 = id_matrix(N);
+	
+	refRes = ref_matmul(id1, id2);
+	parRes = parallel_matmul(id1, id2);
+
+	EXPECT_TRUE(is_equal(refRes, parRes));
+	print_exp_rec(refRes, parRes);
+}
+
+TEST(Parallel_vs_reference_valid, id_100) {
+	int N = 100;
+	Matrix<float> id1(N, N), id2(N, N), refRes(N, N), parRes(N, N);
+	id1 = id_matrix(N);
+	id2 = id_matrix(N);
+	
+	refRes = ref_matmul(id1, id2);
+	parRes = parallel_matmul(id1, id2);
+
+	EXPECT_TRUE(is_equal(refRes, parRes));
+	print_exp_rec(refRes, parRes, 5, 5);
+}
+
+TEST(Parallel_vs_reference_valid, NxK_KxM) {
 	int N = 4;
 	int K = 3;
 	int M = 5;
-	Matrix<float> a(N, K), b(K, M), calcRes(N, M), expRes(N, M);
+	Matrix<float> a(N, K), b(K, M), refRes(N, M), parRes(N, M);
 	fill_n_4_k_3_m_5_matrices(a, b);
 
-	expRes = ref_matmul(a, b);
-	calcRes = parallel_matmul(a, b);
+	refRes = ref_matmul(a, b);
+	parRes = parallel_matmul(a, b);
 
-	EXPECT_TRUE(calcRes == expRes);
-
-	std::cout << "Expected:\n";
-	print_matrix(expRes);
-	std::cout << "Received:\n";
-	print_matrix(calcRes);
+	EXPECT_TRUE(refRes == parRes);
+	print_exp_rec(refRes, parRes);
 }
+
+TEST(Parallel_vs_reference_valid, random) {
+	srand(time(0));
+
+	for (int i = 0; i < 10; ++i) {
+
+		cout << "Random test number " << i << ":\n";
+		int N = posIntRand();
+		int K = posIntRand();
+		int M = posIntRand();
+		Matrix<float> a(N, K), b(K, M), refRes(N, M), parRes(N, M);
+		a = rand_matrix(N, K);
+		b = rand_matrix(K, M);
+
+		cout << "A = " << N << ", " << K << ":\n";
+		print_matrix(a, 5, 5);
+		cout << "B = " << K << ", " << M << ":\n";
+		print_transp_matrix(b, 5, 5);
+
+		refRes = ref_matmul(a, b);
+		parRes = parallel_matmul(a, b);
+		print_exp_rec(refRes, parRes, 5, 5);
+		EXPECT_TRUE(refRes == parRes);
+		EXPECT_TRUE(is_equal(refRes, parRes));
+	}
+}
+
+///Random tests ---------------------------------------------------------------------
 
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
+
+  cout << endl;
+  cout << "----------------------------------------------------------\n";
+  cout << "------------------TESTS START-----------------------------\n";
+  cout << "----------------------------------------------------------\n";
+  cout << endl;
 
   return RUN_ALL_TESTS();
 }
