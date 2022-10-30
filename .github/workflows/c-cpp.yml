@@ -41,4 +41,7 @@ jobs:
       - name: build image
         run: docker build -t project:v1 .
       - name: run the docker image
-        run: docker run --rm -t project:v1
+        run: docker run project:v1
+      -
+        name: install deps
+        run: sudo apt install g++
