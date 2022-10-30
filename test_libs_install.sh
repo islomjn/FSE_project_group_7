@@ -1,7 +1,7 @@
 #!/bin/sh
-apt install libgtest-dev libgmock-dev
-apt install libtbb-dev
-apt install cmake
+sudo apt install libgtest-dev libgmock-dev
+sudo apt install libtbb-dev
+sudo apt install cmake
 PRJDIR=$(pwd)
 cd /usr/src/googletest/
 mkdir build
