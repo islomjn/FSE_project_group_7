@@ -16,7 +16,7 @@ jobs:
     - name: docker
       run: docker build -t project:v1  -f Dockerfile .
     - name: docker_run
-      run: docker run -it project:v1
+      run: docker -rm -t project:v1
 #     - name: execute
 #       run: g++ main_matrix.cpp -fopenmp -o main
 #     - name: configure
