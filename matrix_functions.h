@@ -3,7 +3,8 @@
 
 #include "Matrix.h"
 
-Matrix<float> matmul(Matrix<float> a, Matrix<float> b);
+Matrix<float> ref_matmul(Matrix<float> a, Matrix<float> b);
+Matrix<float> parallel_matmul(Matrix<float> a, Matrix<float> b);
 Matrix<float> vector_mat_mul(Matrix<float> a, Matrix<float> b);
 void print_matrix(Matrix<float> a);
 

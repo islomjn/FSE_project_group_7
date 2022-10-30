@@ -169,10 +169,11 @@ template<class T, int R = 0, int C = 0> class Matrix{
             return Proxy(arr, width, x);
         }
         bool operator== (Matrix m){
+            float eps = 1e-04;
             if(this->width == m.width && this->height == m.height){
                 for(int i = 0; i < this->width; i++){
                     for(int j = 0; j < this->height; j++){
-                        if((*this)[i][j] != m[i][j])
+                        if(((*this)[i][j] - m[i][j]) > eps || ((*this)[i][j] - m[i][j]) < -eps)
                             return false;
                     }
                 }
