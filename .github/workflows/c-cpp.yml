@@ -42,12 +42,12 @@ jobs:
         run: docker build -t project:v1 .
       - name: run the docker image
         run: docker run project:v1
-      -
-        name: install deps
-        run: sudo apt install g++
-      -
-        name: run cpp file
-        run: g++ main.cpp matrix_functions.cpp -fopenmp -o main
+#       -
+#         name: install deps
+#         run: sudo apt install g++
+#       -
+#         name: run cpp file
+#         run: g++ main.cpp matrix_functions.cpp -fopenmp -o main
       - 
         name: execute
-        run: ./main
+        run: ./run.sh
