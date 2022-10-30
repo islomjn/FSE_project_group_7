@@ -9,6 +9,12 @@ Simple matrix multiplication parallelized algo using OpenMP library and Matrix d
 * matrix_functions.cpp - functions to work with matrices
 * test_matrix_functions - tests for matrix functions
 
+### build the image from dockerfile and run the container
+```
+docker build -t project:v1  -f Dockerfile .
+docker run -it project:v1
+```
+
 ### Launch
 To run:
 ```
